@@ -1,63 +1,15 @@
 <template>
   <div id="app">
     <p v-if="isLoading">Loading</p>
-    <h2>Shopping Cart</h2>
-    <p v-if="!cart.length">No item in cart.</p>
-    <div class="cart">
-      <div class="item" v-for="(item, index) in cart" :key="index">
-        <div class="image">
-          <a :href="item.url">
-            <img :src="item.image" />
-          </a>
-        </div>
-        <div class="info">
-          <h4>{{ item.name }}</h4>
-          <p class="seller">by {{ item.seller }}</p>
-          <p class="status available" v-if="item.isAvailable">In Stock</p>
-          <p class="shipping" v-if="item.isEligible">
-            Eligible for FREE Shipping & FREE Returns
-          </p>
-          <a href="#" @click="removeFromCart(index)">Delete</a>
-          <a href="#" class="secondary" @click="addToSaved(index)"
-            >Save for later</a
-          >
-        </div>
-        <p class="price">${{ item.price }}</p>
-      </div>
-      <div class="subtotal">
-        Subtotal ({{ cart.length }} items):
-        <span class="price">${{ cartTotal }}</span>
-      </div>
-    </div>
-
-    <h2 class="saved-header">Saved for later ({{ saved.length }} item)</h2>
-    <div class="cart">
-      <div class="item" v-for="(item, index) in saved" :key="index">
-        <div class="image">
-          <a :href="item.url">
-            <img :src="item.image" />
-          </a>
-        </div>
-        <div class="info">
-          <h4>{{ item.name }}</h4>
-          <p class="seller">by {{ item.seller }}</p>
-          <p class="status available" v-if="item.isAvailable">In Stock</p>
-          <p class="shipping" v-if="item.isEligible">
-            Eligible for FREE Shipping & FREE Returns
-          </p>
-          <a href="#">Delete</a>
-          <a href="#" class="secondary" @click="removeFromSaved(index)"
-            >Move to cart</a
-          >
-        </div>
-        <p class="price">${{ item.price }}</p>
-      </div>
-    </div>
+    <Cart :cart='cart' title='Shopping Cart' type='shoppingCart' @handleItemChange='handleItemChange'/>
+  <Cart :cart='saved' title='Saved for later' type='savedCart' @handleItemChange='handleItemChange'/>
   </div>
 </template>
 
 <script>
+import Cart from './components/Cart.vue';
 export default {
+  components: { Cart },
   name: "app",
   data() {
     return {
@@ -67,27 +19,16 @@ export default {
     };
   },
   methods: {
-    removeFromCart(index) {
-      this.cart.splice(index, 1);
-    },
-    addToSaved(index) {
-      const item = this.cart.splice(index, 1);
-      this.saved.push(item[0]);
-    },
-    removeFromSaved(index) {
-      const item = this.saved.splice(index, 1);
-      this.cart.push(item[0]);
-    }
+   handleItemChange(item,cartType){
+     if (cartType==='shoppingCart') {
+        this.saved.push(item);
+       }
+       else{
+        this.cart.push(item);
+       }
+   }
   },
-  computed: {
-    cartTotal() {
-      let total = 0;
-      this.cart.forEach(item => {
-        total += parseFloat(item.price,10);
-      });
-      return total.toFixed(2);
-    }
-  },
+  
   created() {
     fetch(`./data.json`)
       .then(res => {
